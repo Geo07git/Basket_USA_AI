@@ -147,10 +147,10 @@ export default function PlayerPredictor({ players, opponents, gameLogs }: Player
 
       {/* Stats Prediction Display Grid - High-Fidelity UI cards with relative confidence bounds */}
       <div className="mb-6">
-        <h3 className="text-[9px] font-mono font-semibold text-white/45 uppercase tracking-widest mb-3">
+        <h3 className="text-[10px] font-mono font-bold text-white/55 uppercase tracking-[0.3em] mb-4">
           📈 Proiecții Statistice & Interval de Încredere (90% CI)
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3.5">
           {(["PTS", "TRB", "AST", "MIN", "3PT", "FG", "PF"] as const).map((key) => {
             const labelMap: Record<string, string> = {
               PTS: "Puncte",
@@ -162,6 +162,8 @@ export default function PlayerPredictor({ players, opponents, gameLogs }: Player
               PF: "Faulturi"
             };
 
+            const isKeyStat = ["PTS", "TRB", "AST"].includes(key);
+
             const proj = predictions[key] || 0;
             const low = ciLow[key] || 0;
             const high = ciHigh[key] || 0;
@@ -172,33 +174,48 @@ export default function PlayerPredictor({ players, opponents, gameLogs }: Player
             const projPercent = Math.min(95, Math.max(5, (proj / totalScale) * 100));
 
             return (
-              <div key={key} className="bg-[#121212] p-3 border border-white/10 rounded-none relative overflow-hidden flex flex-col justify-between">
+              <div 
+                key={key} 
+                className={`bg-[#121212] p-4.5 border ${
+                  isKeyStat ? "border-white/20 shadow-lg shadow-[#FF6B00]/5" : "border-white/10"
+                } hover:border-[#FF6B00]/50 transition-all duration-300 rounded-none relative overflow-hidden flex flex-col justify-between`}
+              >
                 <div>
-                  <span className="text-[9px] font-mono tracking-wider text-white/40 block uppercase">{labelMap[key]}</span>
-                  <div className="text-xl font-bold text-white font-mono mt-0.5 tracking-tight">
+                  <span className={`text-[10px] font-mono tracking-widest block uppercase font-bold ${
+                    isKeyStat ? "text-[#FF6B00]" : "text-white/50"
+                  }`}>
+                    {labelMap[key]}
+                  </span>
+                  <div className={`text-3xl md:text-4xl font-extrabold font-mono mt-2 tracking-tight ${
+                    isKeyStat ? "text-white" : "text-white/90"
+                  }`}>
                     {proj.toFixed(1)}
                   </div>
                 </div>
 
                 {/* Micro slider chart mapping confidence limits */}
-                <div className="mt-4 pt-2 border-t border-white/10 flex flex-col gap-1">
-                  <div className="flex justify-between text-[8px] font-mono text-white/30">
+                <div className="mt-5 pt-3 border-t border-white/10 flex flex-col gap-1.5">
+                  <div className="flex justify-between text-[10px] font-mono text-white/40 font-medium">
                     <span>{low.toFixed(1)}</span>
                     <span>{high.toFixed(1)}</span>
                   </div>
-                  <div className="h-[2px] bg-white/10 w-full relative">
+                  <div className="h-[3px] bg-white/15 w-full relative rounded-full">
                     {/* Confidence Range Span */}
                     <div 
                       style={{ left: `${lowPercent}%`, right: `${100 - (high / totalScale) * 100}%` }} 
-                      className="absolute h-full bg-[#FF6B00]/20"
+                      className={`absolute h-full rounded-full ${
+                        isKeyStat ? "bg-[#FF6B00]/30" : "bg-white/20"
+                      }`}
                     ></div>
                     {/* Proj dot */}
                     <div 
                       style={{ left: `${projPercent}%` }} 
-                      className="absolute -top-[1.5px] w-1.5 h-1.5 bg-[#FF6B00] -translate-x-1/2"
+                      className={`absolute -top-[2px] w-2 h-2 rounded-full -translate-x-1/2 ${
+                        isKeyStat ? "bg-[#FF6B00] shadow-md shadow-[#FF6B00]/50" : "bg-white"
+                      }`}
                     ></div>
                   </div>
-                  <span className="text-[7px] text-center text-white/40 font-mono tracking-tight mt-0.5 uppercase">
+                  <span className="text-[9px] text-center text-white/55 font-mono tracking-wider mt-1 uppercase font-semibold">
                     Err: ±{(rmse[key] || 0).toFixed(1)}
                   </span>
                 </div>
