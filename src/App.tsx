@@ -31,6 +31,32 @@ export default function App() {
     }
   });
 
+  // Automatically attempt to import hoopmetrics_import.json on startup if not explicitly reset
+  React.useEffect(() => {
+    const isReset = localStorage.getItem("hoopmetrics_is_reset") === "true";
+    if (isReset) {
+      return;
+    }
+
+    fetch("/hoopmetrics_import.json")
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error("Nu s-a găsit fișierul hoopmetrics_import.json pe server.");
+      })
+      .then((data) => {
+        if (data && (data.teams || data.players || data.gameLogs)) {
+          setImportedData(data);
+          localStorage.setItem(LOCAL_STORAGE_IMPORTED_DATA_KEY, JSON.stringify(data));
+          console.log("Asimilat automat hoopmetrics_import.json din rădăcina proiectului!");
+        }
+      })
+      .catch((err) => {
+        console.info("Info auto-import: hoopmetrics_import.json nu a fost găsit sau a fost ignorat:", err.message);
+      });
+  }, []);
+
   // Calculate lists based on imported vs static fallback data
   const teams = useMemo(() => {
     if (importedData?.teams && importedData.teams.length > 0) {
@@ -81,11 +107,13 @@ export default function App() {
   const handleImportData = (data: any) => {
     setImportedData(data);
     localStorage.setItem(LOCAL_STORAGE_IMPORTED_DATA_KEY, JSON.stringify(data));
+    localStorage.removeItem("hoopmetrics_is_reset");
   };
 
   const handleResetData = () => {
     setImportedData(null);
     localStorage.removeItem(LOCAL_STORAGE_IMPORTED_DATA_KEY);
+    localStorage.setItem("hoopmetrics_is_reset", "true");
   };
 
   const seasons = league === "nba" ? ["2025-2026"] : ["2026"];
@@ -99,7 +127,7 @@ export default function App() {
           
           <div className="space-y-1">
             <h1 id="app-title" className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none italic text-white" style={{ fontFamily: "Georgia, serif" }}>
-              Predicții V2
+              BASCHET USA ({new Date().getFullYear()})
             </h1>
             <p className="text-[10px] tracking-[0.25em] uppercase text-white/50 font-mono">
               Incremental Data Engine • {league.toUpperCase()} Analysis
