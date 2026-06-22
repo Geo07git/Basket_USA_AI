@@ -1,0 +1,6 @@
+{
+  "name": "Basketball Analytics Predictor V2",
+  "description": "An advanced analytics dashboard simulating real-time NBA/WNBA game matchups, player statistical projections, and incremental automated data operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
